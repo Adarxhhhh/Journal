@@ -37,12 +37,14 @@ public class JournalEntryService {
             journalEntryRepository.deleteById(myId);
             return myId;
         }
-    }public String editEntry(ObjectId id, JournalEntry entry){
+    }
+
+    public boolean editEntry(ObjectId id, JournalEntry entry){
 
         Optional<JournalEntry> optional = journalEntryRepository.findById(id);
 
         if(optional.isEmpty()){
-            return "Used does not exist...";
+            return false;
         }else{
             JournalEntry existing = optional.get();
 
@@ -54,7 +56,7 @@ public class JournalEntryService {
                 existing.setContent(entry.getContent());
             }
 
-            return "Update Successful";
+            return true;
         }
     }
 }
