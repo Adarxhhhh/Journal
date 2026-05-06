@@ -1,0 +1,10 @@
+### GET request to example server
+POST http://localhost:8080/user/add-user
+Content-Type: application/json
+
+{
+  "userName": "aduk2204",
+  "password": "Amk#22041999"
+}
+
+###

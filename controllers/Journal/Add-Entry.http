@@ -1,0 +1,10 @@
+### POST request to add entry to user and map it to the specific username
+POST localhost:8080/journal/aduk2204
+Content-Type: application/json
+
+{
+  "title": "Beer",
+  "content": "Beer is bad"
+}
+
+###

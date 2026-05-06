@@ -1,42 +1,80 @@
 package net.engineeringdigest.journalApplication.service;
 
+import net.engineeringdigest.journalApplication.entity.JournalEntry;
 import net.engineeringdigest.journalApplication.entity.User;
+import net.engineeringdigest.journalApplication.repository.JournalEntryRepository;
 import net.engineeringdigest.journalApplication.repository.UserRepository;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 @Component
 public class UserService {
 
     @Autowired
     private UserRepository userRepository;
+    @Autowired
+    private JournalEntryRepository journalEntryRepository;
 
-    public boolean saveEntry(User user){
+    private static final PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+
+    public void saveEntry(User user){
         userRepository.save(user);
-        return true;
     }
 
-    public List<User> getEntries(){
-        return new ArrayList<>(userRepository.findAll());
+    public void saveNewUser(User user){
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
+        user.setRoles(List.of("USER"));
+        userRepository.save(user);
     }
 
-    public User findUserByUserName(String userName){
+//    public List<User> getEntries(){
+//        return new ArrayList<>(userRepository.findAll());
+//    }
+
+    public User findByUserName(String userName){
         return userRepository.findByUserName(userName);
     }
 
-    public boolean deleteEntry(ObjectId myId){
+//    public boolean getUserByUserName(String userName){
+//        if(userRepository.findAll().contains(userName)){
+//            return false;
+//        }else{
+//            return true;
+//        }
+//    }
 
-        if(!userRepository.existsById(myId)){
-            return false;
-        }else{
-            userRepository.deleteById(myId);
-            return true;
+//    public boolean deleteEntry(ObjectId myId, String userName){
+//
+//        if(!userRepository.existsById(myId)){
+//            return false;
+//        }else{
+//            userRepository.deleteById(myId);
+//            return true;
+//        }
+//    }
+
+    @Transactional
+    public boolean deleteByUserName(String userName){
+        try{
+            User user = userRepository.findByUserName(userName);
+
+            if(user != null){
+                List<JournalEntry> entries = user.getJournalEntries();
+                entries.forEach(entry -> journalEntryRepository.deleteById(entry.getId()));
+                userRepository.delete(user);
+                return true;
+            }
+        }catch (Exception e){
+            System.out.println(e.getMessage());
         }
+        return false;
     }
 }
 
