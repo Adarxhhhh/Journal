@@ -9,7 +9,8 @@ import org.springframework.data.mongodb.core.mapping.Document;
 import java.time.LocalDateTime;
 
 @Document(collection = "journal_entries")
-@Data
+@Getter
+@Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
@@ -18,9 +19,7 @@ public class JournalEntry {
     @Id
     private ObjectId id;
 
-    @Indexed(unique = true)
-    private String userid;
-
+    @NonNull
     private String title;
 
     private String content;

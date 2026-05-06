@@ -2,7 +2,9 @@ package net.engineeringdigest.journalApplication.entity;
 
 
 import lombok.Data;
+import lombok.Getter;
 import lombok.NonNull;
+import lombok.Setter;
 import net.engineeringdigest.journalApplication.repository.UserRepository;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,7 +23,8 @@ public class User {
     @Id
     private ObjectId userId;
 
-    @Indexed(unique = true) @NonNull
+    @Indexed(unique = true)
+    @NonNull
     private String userName;
 
     @NonNull
@@ -29,4 +32,6 @@ public class User {
 
     @DBRef
     private List<JournalEntry> journalEntries = new ArrayList<>();
+
+    private List<String> Roles;
 }
