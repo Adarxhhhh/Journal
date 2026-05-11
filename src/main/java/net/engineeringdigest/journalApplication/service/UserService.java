@@ -1,20 +1,21 @@
 package net.engineeringdigest.journalApplication.service;
 
+import lombok.extern.slf4j.Slf4j;
 import net.engineeringdigest.journalApplication.entity.JournalEntry;
 import net.engineeringdigest.journalApplication.entity.User;
 import net.engineeringdigest.journalApplication.repository.JournalEntryRepository;
 import net.engineeringdigest.journalApplication.repository.UserRepository;
-import org.bson.types.ObjectId;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 import java.util.ArrayList;
 import java.util.List;
 
-@Component
+@Service
+@Slf4j
 public class UserService {
 
     @Autowired
@@ -24,19 +25,32 @@ public class UserService {
 
     private static final PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
+
+
+
     public void saveEntry(User user){
         userRepository.save(user);
     }
 
     public void saveNewUser(User user){
-        user.setPassword(passwordEncoder.encode(user.getPassword()));
-        user.setRoles(List.of("USER"));
-        userRepository.save(user);
+        try {
+            user.setPassword(passwordEncoder.encode(user.getPassword()));
+            user.setRoles(List.of("USER"));
+            userRepository.save(user);
+        }catch (Exception e){
+            log.error("Error in saving user: {} -> {}", user.getUserName(), e.getClass());
+        }
     }
 
-//    public List<User> getEntries(){
-//        return new ArrayList<>(userRepository.findAll());
-//    }
+    public void saveNewAdmin(User adminUser){
+        adminUser.setPassword(passwordEncoder.encode(adminUser.getPassword()));
+        adminUser.setRoles(List.of("USER", "ADMIN"));
+        userRepository.save(adminUser);
+    }
+
+    public List<User> getEntries(){
+        return new ArrayList<>(userRepository.findAll());
+    }
 
     public User findByUserName(String userName){
         return userRepository.findByUserName(userName);
@@ -72,6 +86,7 @@ public class UserService {
                 return true;
             }
         }catch (Exception e){
+            log.error("Username not found: {}", userName);
             System.out.println(e.getMessage());
         }
         return false;

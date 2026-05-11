@@ -31,19 +31,6 @@ public class JournalEntryControllerV5 {
     @Autowired
     private UserService userService;
 
-    //Dummy Procedure to fetch all entries
-//    @GetMapping("/get-entry")
-//    public ResponseEntity<?> getAllJournalEntries(){
-//        List<JournalEntry> entries = journalEntryService.getEntries();
-//
-//        if(entries.isEmpty()){
-//            return ResponseEntity.badRequest().body("Empty List");
-//        }else{
-//            return ResponseEntity.ok().body(entries);
-//        }
-//    }
-
-
     @GetMapping("/get-entry")
     public ResponseEntity<?> getAllJournalEntriesOfUser(){
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -101,9 +88,7 @@ public class JournalEntryControllerV5 {
         if(ownsEntry) {
             JournalEntry old = journalEntryService.findById(myId).orElse(null);
             if (old != null) {
-                old.setTitle(!entry.getTitle().isEmpty() ? entry.getTitle() : old.getTitle());
-                old.setContent(entry.getContent() != null && !entry.getContent().isEmpty() ? entry.getContent() : old.getContent());
-                journalEntryService.saveEntry(old);
+                journalEntryService.editEntry(myId, entry);
                 return ResponseEntity.ok().body(old);
             }
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);

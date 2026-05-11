@@ -1,10 +1,7 @@
 package net.engineeringdigest.journalApplication.entity;
 
 
-import lombok.Data;
-import lombok.Getter;
-import lombok.NonNull;
-import lombok.Setter;
+import lombok.*;
 import net.engineeringdigest.journalApplication.repository.UserRepository;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,6 +15,7 @@ import java.util.List;
 
 @Document(collection = "users")
 @Data
+@Builder
 public class User {
 
     @Id
