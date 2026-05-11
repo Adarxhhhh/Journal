@@ -1,13 +1,16 @@
 package net.engineeringdigest.journalApplication.service;
 
+import lombok.extern.slf4j.Slf4j;
 import net.engineeringdigest.journalApplication.entity.JournalEntry;
 import net.engineeringdigest.journalApplication.entity.User;
 import net.engineeringdigest.journalApplication.repository.JournalEntryRepository;
 import net.engineeringdigest.journalApplication.repository.UserRepository;
 import org.bson.types.ObjectId;
-import org.springframework.beans.factory.ListableBeanFactory;
+import org.slf4j.LoggerFactory;
+import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
@@ -17,7 +20,8 @@ import java.util.Optional;
 
 //Controller -> Service -> Repository
 
-@Component
+@Service
+@Slf4j
 public class JournalEntryService {
 
     @Autowired
@@ -26,37 +30,38 @@ public class JournalEntryService {
     private UserService userService;
     @Autowired
     private UserRepository userRepository;
-    @Autowired
-    private ListableBeanFactory listableBeanFactory;
 
 
     @Transactional
     public void saveEntry(JournalEntry journalEntry, String userName){
         try{
             User user = userService.findByUserName(userName);
-
             journalEntry.setDate(LocalDateTime.now());
             JournalEntry saved = journalEntryRepository.save(journalEntry);
             user.getJournalEntries().add(saved);
+
             //This line to set a username to null is to test why the @Transactional annotation is required;
             //Without the @Transactional the journal entry is saved to the journal entry db but the entry reference is not saved to users db
             //This is because we changed the username to null after the entry was saved but before the reference could be saved to the user.
             //@Transactional makes sure that the complete method is executed without any errors and if at any point there is an error all the previous changes in the method are rolled back.
             //user.setUserName(null);
+
             userService.saveEntry(user);
         }catch (Exception e){
-            System.out.println(e);
-            throw new RuntimeException("An error occured while saving the entry...");
+            log.error("User not found with this userName: {} \n Cannot save Entry", userName);
+            throw new RuntimeException("An error occurred while saving the entry...");
         }
     }
 
     public void saveEntry(JournalEntry journalEntry){
         journalEntry.setDate(LocalDateTime.now());
 
-        JournalEntry saved = journalEntryRepository.save(journalEntry);
+        journalEntryRepository.save(journalEntry);
 
     }
 
+    //Dummy procedure call to see all entries in the Journal DB.
+    //Only for admins to see the journal entries.
     public List<JournalEntry> getEntries(){
         return new ArrayList<>(journalEntryRepository.findAll());
     }
@@ -83,7 +88,7 @@ public class JournalEntryService {
             if(entry.getContent() != null){
                 existing.setContent(entry.getContent());
             }
-
+            journalEntryRepository.save(existing);
             return true;
         }
     }
