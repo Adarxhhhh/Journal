@@ -1,7 +1,9 @@
 package net.engineeringdigest.journalApplication.controller.User;
 
+import net.engineeringdigest.journalApplication.api.response.WeatherResponse;
 import net.engineeringdigest.journalApplication.entity.User;
 import net.engineeringdigest.journalApplication.service.UserService;
+import net.engineeringdigest.journalApplication.service.WeatherService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -9,14 +11,14 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-
 @RestController
 @RequestMapping("/user")
 public class UserController {
 
     @Autowired
     private UserService userService;
+    @Autowired
+    private WeatherService weatherService;
 
 //    @GetMapping("/get-users")
 //    public ResponseEntity<?> getAllUsers(){
@@ -41,6 +43,25 @@ public class UserController {
             return new ResponseEntity<>(userInDb, HttpStatus.OK);
         }
     }
+
+    @GetMapping("/greeting")
+    public ResponseEntity<?> greeting() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String greeting = "Hi " + authentication.getName();
+
+        WeatherResponse weatherResponse = weatherService.getWeather("Austin");
+
+        StringBuilder message = new StringBuilder(greeting);
+
+        // Append weather if available
+        if (weatherResponse != null && weatherResponse.getCurrent() != null) {
+            message.append(", Weather in Austin feels like ") //
+                    .append(weatherResponse.getCurrent().getFeelslike());
+        }
+
+        return new ResponseEntity<>(message.toString(), HttpStatus.OK);
+    }
+
 
     @PutMapping("/edit-user")
     public ResponseEntity<?> updateUser(@RequestBody User user){
