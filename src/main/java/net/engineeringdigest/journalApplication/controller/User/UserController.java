@@ -44,18 +44,18 @@ public class UserController {
         }
     }
 
-    @GetMapping("/greeting")
-    public ResponseEntity<?> greeting() {
+    @GetMapping("/greeting/{myCity}")
+    public ResponseEntity<?> greeting(@PathVariable String myCity) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String greeting = "Hi " + authentication.getName();
 
-        WeatherResponse weatherResponse = weatherService.getWeather("Austin");
+        WeatherResponse weatherResponse = weatherService.getWeather(myCity);
 
         StringBuilder message = new StringBuilder(greeting);
 
         // Append weather if available
         if (weatherResponse != null && weatherResponse.getCurrent() != null) {
-            message.append(", Weather in Austin feels like ") //
+            message.append(", Weather in ").append(myCity).append(" feels like ") //
                     .append(weatherResponse.getCurrent().getFeelslike());
         }
 

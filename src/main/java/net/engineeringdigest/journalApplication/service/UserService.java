@@ -26,8 +26,6 @@ public class UserService {
     private static final PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
 
-
-
     public void saveEntry(User user){
         userRepository.save(user);
     }
